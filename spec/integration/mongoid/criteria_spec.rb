@@ -48,9 +48,7 @@ describe Mongoid::Criteria do
       it "it properly excludes ids" do
         Person.excludes(:_id => person.id).entries.should be_empty
       end
-
     end
-
   end
 
   describe "#execute" do
@@ -132,6 +130,29 @@ describe Mongoid::Criteria do
     end
   end
 
+  describe "#any_of" do
+
+    before do
+      Person.create(:title => "Sir", :age => 5, :ssn => "098-76-5432")
+      Person.create(:title => "Sir", :age => 7, :ssn => "098-76-5433")
+      Person.create(:title => "Madam", :age => 1, :ssn => "098-76-5434")
+    end
+
+    context "with a single match" do
+
+      it "returns any matching documents" do
+        Person.where(:title => "Madam").any_of(:age => 1).count.should == 1
+      end
+    end
+
+    context "when chaining for multiple matches" do
+
+      it "returns any matching documents" do
+        Person.any_of({ :age => 7 }, { :age.lt => 3 }).count.should == 2
+      end
+    end
+  end
+
   describe "#sum" do
 
     context "without results" do
@@ -198,6 +219,16 @@ describe Mongoid::Criteria do
         Person.where(:score.exists => "f").should == [person]
       end
 
+    end
+
+    context "with multiple complex criteria" do
+      before do
+        Person.create(:title => "Mrs", :age => 29)
+        Person.create(:title => "Ms", :age => 41)
+      end
+      it "returns those matching both criteria" do
+        Person.where(:age.gt => 30, :age.lt => 40).should == [person]
+      end
     end
 
     context "with complex criterion" do
