@@ -1,4 +1,4 @@
-pt:
+pt-br:
   activemodel:
     errors:
       messages:
@@ -15,13 +15,13 @@ pt:
           O campo foi definido como %{klass}, mas recebeu uma instância de %{other} com
           o valor %{value}.
         unsupported_version:
-          MongoDB %{version} não é suportada, por favor actualize para a 
+          MongoDB %{version} não é suportada, por favor atualize para a 
           versão %{mongo_version}.
         validations:
           A validação falhou - %{errors}.
         invalid_collection:
           O acesso à colecção para %{klass} não é permitido porque
-          é um documento embebido, por favor aceda à colecção através
+          é um documento embutido, por favor acesse à colecção através
           do documento raiz.
         invalid_field:
           Não é permitido definir um campo com o nome %{name}. Não defina
@@ -37,4 +37,4 @@ pt:
           é apenas válida para associações references_one ou references_many.
         association_cant_have_inverse_of:
           A definição de inverse_of nesta associação não é permitida. Apenas
-          use esta opção em embedded_in ou references_many como lista.
+          use esta opção em embedded_in ou references_many as array.
