@@ -22,6 +22,8 @@ Dir[ File.join(MODELS, "*.rb") ].sort.each { |file| require File.basename(file) 
 
 Rspec.configure do |config|
   config.mock_with :mocha
+  config.filter_run :focus => true
+  config.run_all_when_everything_filtered = true
   config.after :suite do
     Mongoid.master.collections.select {|c| c.name !~ /system/ }.each(&:drop)
   end
