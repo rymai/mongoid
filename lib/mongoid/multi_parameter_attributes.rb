@@ -13,7 +13,7 @@ module Mongoid #:nodoc:
           @message = message
         end
       end
-
+      
       # Raised when there are multiple errors while doing a mass assignment through the +attributes+
       # method. The exception has an +errors+ property that contains an array of AttributeAssignmentError
       # objects, each corresponding to the error while assigning to an attribute.
@@ -25,15 +25,34 @@ module Mongoid #:nodoc:
       end
     end
     
-    def process(pairs = nil)
+    def process(attrs = nil)
+      if attrs
+        attributes = {}
+        multi_parameter_attributes = []
+        
+        attrs.stringify_keys.each do |k, v|
+          if k.include?("(")
+            multi_parameter_attributes << [ k, v ]
+          else
+            attributes[k] = v
+          end
+        end
+        super attributes.merge(assign_multiparameter_attributes(multi_parameter_attributes))
+      else
+        super
+      end
+    end
+    
+  protected
+    
+    def assign_multiparameter_attributes(pairs)
       execute_callstack_for_multiparameter_attributes(
         extract_callstack_for_multiparameter_attributes(pairs)
       )
     end
     
-  protected
-    
     def execute_callstack_for_multiparameter_attributes(callstack)
+      attributes = {}
       errors = []
       callstack.each do |name, values_with_empty_parameters|
         begin
@@ -43,7 +62,7 @@ module Mongoid #:nodoc:
           values = values_with_empty_parameters.reject { |v| v.nil? }
           
           if values.empty?
-            send(name + "=", nil)
+            attributes[name] = nil
           else
             
             value = if Time == klass
@@ -59,7 +78,7 @@ module Mongoid #:nodoc:
               klass.new(*values)
             end
             
-            send(name + "=", value)
+            attributes[name] = value
           end
         rescue => ex
           errors << Errors::AttributeAssignmentError.new("error on assignment #{values.inspect} to #{name}", ex, name)
@@ -68,6 +87,7 @@ module Mongoid #:nodoc:
       unless errors.empty?
         raise Errors::MultiparameterAssignmentErrors.new(errors), "#{errors.size} error(s) on assignment of multiparameter attributes"
       end
+      attributes
     end
     
     def extract_callstack_for_multiparameter_attributes(pairs)

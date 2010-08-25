@@ -62,6 +62,7 @@ describe Mongoid::MultiParameterAttributes do
         it "should raise an exception" do
           lambda {
             @person = Person.new({
+              "title"   => "John",
               "dob(1i)" => "",
               "dob(2i)" => "",
               "dob(3i)" => ""
